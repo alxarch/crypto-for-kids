@@ -12,23 +12,30 @@ function parseOptions (options, defaults) {
 function encrypt (data, options) {
 	options = parseOptions(options, {
 		algorithm: 'aes-256-ctr',
-		format: 'hex'
+		format: 'hex',
+		encoding: 'utf8'
 	});
 	const cipher = crypto.createCipher(options.algorithm, options.secret);
-	cipher.end(data);
-	const result = cipher.read();
-	return result != null ? result.toString(options.format) : result;
+	data = data instanceof Buffer ? data : `${data}`;
+	const parts = [];
+	parts.push(cipher.update(data, options.encoding));
+	parts.push(cipher.final());
+	const result = Buffer.concat(parts);
+	return result ? result.toString(options.format) : result;
 }
 
 function decrypt (data, options) {
 	options = parseOptions(options, {
 		algorithm: 'aes-256-ctr',
-		format: 'hex'
+		format: 'hex',
+		encoding: 'utf8'
 	});
 	const decipher = crypto.createDecipher(options.algorithm, options.secret);
-	decipher.end(new Buffer(data, options.format));
-	const result = decipher.read();
-	return result != null ? result.toString() : result;
+	const parts = [];
+	parts.push(decipher.update(data, options.encoding));
+	parts.push(decipher.final());
+	const result = Buffer.concat(parts);
+	return result ? result.toString(options.format) : result;
 }
 
 function hash (data, options) {
