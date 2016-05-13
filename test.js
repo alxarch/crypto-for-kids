@@ -25,4 +25,13 @@ describe('Crypto for kids module', () => {
 					'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
 		});
 	});
+	describe('crypto.encrypt()', () => {
+		it('Signs string data with default settings', () => {
+			const msg = 'Foo bar baz';
+			const secret = 'secretesauce';
+			const encrypted = crypto.encrypt(new Buffer(msg), {format: 'hex', secret: secret});
+			const decrypted = crypto.decrypt(encrypted, {format: 'utf8', encoding: 'hex', secret: secret});
+			assert.equal(msg, decrypted, 'OK');
+		});
+	});
 });
