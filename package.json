@@ -1,0 +1,23 @@
+{
+  "name": "crypto-for-kids",
+  "version": "0.1.0",
+  "description": "A crypto wrapper that a child could use",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alxarch/crypto-for-kids.git"
+  },
+  "keywords": [
+    "crypto",
+    "node"
+  ],
+  "author": "Sigalas Alexandros <alxarch@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alxarch/crypto-for-kids/issues"
+  },
+  "homepage": "https://github.com/alxarch/crypto-for-kids#readme"
+}
