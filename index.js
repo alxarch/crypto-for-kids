@@ -32,10 +32,10 @@ function decrypt (data, options) {
 	});
 	const decipher = crypto.createDecipher(options.algorithm, options.secret);
 	const parts = [];
-	parts.push(decipher.update(data, options.encoding));
+	parts.push(decipher.update(data, options.format));
 	parts.push(decipher.final());
 	const result = Buffer.concat(parts);
-	return result ? result.toString(options.format) : result;
+	return result ? result.toString(options.encoding) : result;
 }
 
 function hash (data, options) {

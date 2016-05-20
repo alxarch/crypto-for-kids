@@ -4,34 +4,27 @@ const assert = require('assert');
 describe('Crypto for kids module', () => {
 	describe('crypto.hmac()', () => {
 		it('Signs string data with default settings', () => {
-			const msg = 'Foo bar baz'
-			const secret = 'secretsauce'
 			assert.equal(
-					crypto.hmac(msg, {format: 'hex', secret: secret}),
-					'cd9fc75345682c3df5160fa6b3db34f59340158ab0a26f521ebf0d39e2e857f9');
-			assert.equal(
-					crypto.hmac(msg, {format: 'base64', secret: secret}),
+					crypto.hmac('Foo bar baz', 'secretsauce'),
 					'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
 		});
-
-		it('Signs buffer data with default settings', () => {
-			const msg = new Buffer('Foo bar baz');
-			const secret = 'secretsauce';
+		it('Signs string data with hex encoding', () => {
 			assert.equal(
-					crypto.hmac(msg, {format: 'hex', secret: secret}),
+					crypto.hmac('Foo bar baz', {format: 'hex', secret: 'secretsauce'}),
 					'cd9fc75345682c3df5160fa6b3db34f59340158ab0a26f521ebf0d39e2e857f9');
+		});
+
+		it('Signs buffer data', () => {
 			assert.equal(
-					crypto.hmac(msg, {format: 'base64', secret: secret}),
+					crypto.hmac(new Buffer('Foo bar baz'), 'secretsauce'),
 					'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
 		});
 	});
 	describe('crypto.encrypt()', () => {
-		it('Signs data with default settings', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const encrypted = crypto.encrypt(new Buffer(msg), {format: 'hex', secret: secret});
-			const decrypted = crypto.decrypt(encrypted, {format: 'utf8', encoding: 'hex', secret: secret});
-			assert.equal(msg, decrypted, 'OK');
+		it('Encrypts/decrypts data with default settings', () => {
+			const encrypted = crypto.encrypt('Foo bar baz', 'secretesauce');
+			const decrypted = crypto.decrypt(encrypted, 'secretesauce');
+			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
 	});
 	describe('crypto.hash', () => {
