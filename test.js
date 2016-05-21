@@ -2,91 +2,69 @@
 const crypto = require('.');
 const assert = require('assert');
 describe('Crypto for kids module', () => {
-	describe('crypto.hmac()', () => {
+	describe('crypto.hs384()', () => {
 		it('Signs string data with default settings', () => {
 			assert.equal(
-					crypto.hmac('Foo bar baz', 'secretsauce'),
-					'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
-		});
-		it('Signs string data with hex encoding', () => {
-			assert.equal(
-					crypto.hmac('Foo bar baz', {format: 'hex', secret: 'secretsauce'}),
-					'cd9fc75345682c3df5160fa6b3db34f59340158ab0a26f521ebf0d39e2e857f9');
+				crypto.hs384('Foo bar baz', 'secretsauce'),
+				'53a317119120f8353fd3feebb2adf5c0dab2894a1ca7368f746f0ce11d96f8d2464879261d2e9034f969ec73ef70f05e');
 		});
 
-		it('Signs buffer data', () => {
+	});
+	describe('crypto.hs512()', () => {
+		it('Signs string data with default settings', () => {
 			assert.equal(
-					crypto.hmac(new Buffer('Foo bar baz'), 'secretsauce'),
+				crypto.hs512('Foo bar baz', 'secretsauce'),
+				'1a4ce2b1b331c7c506bbc293cf16b78772a8201e09e9dba4151e96c4cfab5e6160907925c6cfd9cc7282c78e0707eab38fa9aad94f826d72cd6f5395f2964ba2');
+		});
+
+	});
+	describe('crypto.hs256()', () => {
+		it('Signs string data with base64', () => {
+			assert.equal(
+				crypto.hs256('Foo bar baz', 'secretsauce', 'base64'),
+				'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
+		});
+		it('Signs string data with default settings', () => {
+			assert.equal(
+				crypto.hs256('Foo bar baz', 'secretsauce'),
+				'cd9fc75345682c3df5160fa6b3db34f59340158ab0a26f521ebf0d39e2e857f9');
+		});
+
+		it('Signs buffer data with base64', () => {
+			assert.equal(
+					crypto.hs256(new Buffer('Foo bar baz'), 'secretsauce', 'base64'),
 					'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
 		});
+		it('Signs buffer data with default to hex', () => {
+			assert.equal(
+				crypto.hs256(new Buffer('Foo bar baz'), 'secretsauce'),
+				'cd9fc75345682c3df5160fa6b3db34f59340158ab0a26f521ebf0d39e2e857f9');
+		});
 	});
+
 	describe('crypto.encrypt()', () => {
 		it('Encrypts/decrypts data with default settings', () => {
 			const encrypted = crypto.encrypt('Foo bar baz', 'secretesauce');
 			const decrypted = crypto.decrypt(encrypted, 'secretesauce');
 			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
+		it('Encrypts/decrypts buffer data with default settings', () => {
+			const encrypted = crypto.encrypt(new Buffer('Foo bar baz'), 'secretesauce');
+			const decrypted = crypto.decrypt(encrypted, 'secretesauce');
+			assert.equal('Foo bar baz', decrypted, 'OK');
+		});
 	});
+
 	describe('crypto.hash', () => {
-		it('Signs data with default settings', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const hash = crypto.hash(new Buffer(msg), {format: 'hex', secret: secret});
-			const hashMD5 = crypto.md5sum(new Buffer(msg));
-			assert.equal(hash, hashMD5, 'OK');
-		});
-		it('Signs data with DSA hash', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const hashDSA = crypto.hash(new Buffer(msg), {format: 'hex', algorithm:'DSA', secret: secret});
-			assert.equal(hashDSA, 'b861fddd3d1262c9102b69025accbf5fe887db2f', 'OK');
-		});
-
-		// SHA1 and DSA algorithms produce the same hash
-
-		it('Signs data with SHA1 hash', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const hashSHA1 = crypto.hash(new Buffer(msg), {format: 'hex', algorithm:'DSA', secret: secret});
-			assert.equal(hashSHA1, 'b861fddd3d1262c9102b69025accbf5fe887db2f', 'OK');
-		});
-		it('Signs data with SHA1 hash', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const hashSHA1 = crypto.hash(new Buffer(msg), {format: 'hex', algorithm:'DSA', secret: secret});
-			assert.equal(hashSHA1, 'b861fddd3d1262c9102b69025accbf5fe887db2f', 'OK');
-		});
-		it('Signs data with SHA1 hash', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const hashWhirlpool = crypto.hash(new Buffer(msg), {format: 'hex', algorithm:'whirlpool', secret: secret});
-			assert.equal(hashWhirlpool, '74a6baf1a6eaba0064c8dee162b25cb745c84869811e9b06332da25431136cfd263ab18e957e93b33cf97374d184f71ea90b9358b0126bc8c9ea7a3928d9361c', 'OK');
-		});
-		it('Signs data with SHA256 hash', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const hashSHA256 = crypto.hash(new Buffer(msg), {format: 'hex', algorithm:'SHA256', secret: secret});
-			assert.equal(hashSHA256, '4653841ef41adb4f201cc4e019409e5c2a8fce1fa88e22d6dbf6549e4965c9a1', 'OK');
+		it('Defaults to MD5', () => {
+			const hash = crypto.hash('Foo bar baz');
+			assert(hash instanceof Buffer);
+			assert.equal(hash.toString('hex'), '520c28a8ac3459af817a1abfb3bd152e');
 		});
 	});
 	describe('crypto.md5sum', () => {
-		it('Signs data with default settings', () => {
-			const msg = 'Foo bar baz';
-			const secret = 'secretesauce';
-			const md5sum = crypto.md5sum(new Buffer(msg), {format: 'hex', secret: secret});
-			assert.equal(md5sum, '520c28a8ac3459af817a1abfb3bd152e', 'OK');
-		});
-	});
-	describe('parseOptions test', () => {
-		it('throws error when no secret is provided', () => {
-			assert.throws(function(){crypto.parseOptions({secret: null})}, TypeError, 'Does not throw error');
-		});
-		it('does not throw error if no secret is provided for hash', () => {
-			const msg = 'Foo bar baz';
-			let options = {};
-			const hash_no_secret = crypto.hash(new Buffer(msg), options);
-			const hash_default = crypto.hash(new Buffer(msg));
-			assert.equal(hash_no_secret, hash_default, 'Secret not foo');
+		it('Computes hash', () => {
+			assert.equal(crypto.md5sum('Foo bar baz'), '520c28a8ac3459af817a1abfb3bd152e');
 		});
 	});
 });

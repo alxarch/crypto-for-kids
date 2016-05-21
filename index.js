@@ -1,68 +1,89 @@
 'use strict';
 // Sync crypto helpers
 const crypto = require('crypto');
+const DEFAULT_CIPHER_ALGORITHM = 'aes-256-ctr';
+const DEFAULT_HASH_ALGORITHM = 'md5';
+const DEFAULT_HMAC_ALGORITHM = 'HS256';
+const DEFAULT_HMAC_ENCODING = 'hex';
+const DEFAULT_HASH_ENCODING = 'hex';
 
-function parseOptions (options, defaults) {
-	options = 'string' == typeof options ? {secret: options} : options;
-	options = Object.assign({}, defaults, options);
-	if (!options.secret) throw new TypeError('No secret specified');
-	return options;
+function checkData (data) {
+	if (data instanceof Buffer) {
+		return data;
+	}
+	else if ('string' == typeof data) {
+		return new Buffer(data);
+	}
+	throw new TypeError('Data is not buffer');
+}
+
+function encrypt (data, secret, algorithm) {
+	data = checkData(data);
+	const cipher = crypto.createCipher(algorithm || DEFAULT_CIPHER_ALGORITHM, secret);
+	const parts = [];
+	parts.push(cipher.update(data));
+	parts.push(cipher.final());
+	return Buffer.concat(parts);
+}
+
+function decrypt (data, secret, algorithm) {
+	data = checkData(data);
+	const decipher = crypto.createDecipher(algorithm || DEFAULT_CIPHER_ALGORITHM, secret);
+	const parts = [];
+	parts.push(decipher.update(data));
+	parts.push(decipher.final());
+	return Buffer.concat(parts);
+}
+
+function hash (data, algorithm) {
+	data = checkData(data);
+	const _hash = crypto.createHash(algorithm || DEFAULT_HASH_ALGORITHM);
+	_hash.end(data);
+	return _hash.read();
+}
+
+function sign (data, key, algorithm) {
+	data = checkData(data);
+	const _sign = crypto.createSign(algorithm);
+	_sign.update(data);
+	return _sign.sign(key);
+}
+
+function hmac (data, secret, algorithm) {
+	data = checkData(data);
+	const _hmac = crypto.createHmac(algorithm || DEFAULT_HMAC_ALGORITHM, secret);
+	_hmac.end(data);
+	return _hmac.read();
+}
+
+module.exports = {
+	sign,
+	encrypt,
+	decrypt,
+	hmac,
+	hash
 };
 
-function encrypt (data, options) {
-	options = parseOptions(options, {
-		algorithm: 'aes-256-ctr',
-		format: 'hex',
-		encoding: 'utf8'
-	});
-	const cipher = crypto.createCipher(options.algorithm, options.secret);
-	data = data instanceof Buffer ? data : `${data}`;
-	const parts = [];
-	parts.push(cipher.update(data, options.encoding));
-	parts.push(cipher.final());
-	const result = Buffer.concat(parts);
-	return result ? result.toString(options.format) : result;
-}
+['md5', 'sha', 'sha1', 'sha224', 'sha384', 'sha512'].forEach( alg => {
+	module.exports[`${alg}sum`] = function (data, encoding) {
+		return hash(data, alg).toString(encoding || DEFAULT_HASH_ENCODING);
+	};
+});
 
-function decrypt (data, options) {
-	options = parseOptions(options, {
-		algorithm: 'aes-256-ctr',
-		format: 'hex',
-		encoding: 'utf8'
-	});
-	const decipher = crypto.createDecipher(options.algorithm, options.secret);
-	const parts = [];
-	parts.push(decipher.update(data, options.format));
-	parts.push(decipher.final());
-	const result = Buffer.concat(parts);
-	return result ? result.toString(options.encoding) : result;
-}
+[256, 384, 512].forEach( bits => {
+	module.exports[`hs${bits}`] = function (data, secret, encoding) {
+		return hmac(data, secret, `sha${bits}`).toString(encoding || DEFAULT_HMAC_ENCODING);
+	};
+	module.exports[`rs${bits}`] = function (data, key, encoding) {
+		return sign(data, key, `RSA-SHA${bits}`).toString(encoding || DEFAULT_HMAC_ENCODING);
+	};
+});
 
-function hash (data, options) {
-	options = parseOptions(options, {
-		format: 'hex',
-		algorithm: 'md5',
-		secret: 'foo'
-	});
-	const _hash = crypto.createHash(options.algorithm);
-	_hash.end(data);
-	const result = _hash.read();
-	return result != null ? result.toString(options.format) : result;
-}
-function md5sum (data, options) {
-	options = Object.assign({}, options, {algorithm: 'md5'});
-	return hash(data, options);
-}
-
-function hmac (data, options) {
-	options = parseOptions(options, {
-		algorithm: 'sha256',
-		format: 'base64'
-	});
-	const _hmac = crypto.createHmac(options.algorithm, options.secret);
-	_hmac.end(data);
-	const result = _hmac.read();
-	return result != null ? result.toString(options.format) : null;
-}
-
-module.exports = {encrypt, decrypt, md5sum, hmac, md5sum, hash, parseOptions};
+['aes192', 'aes256', 'aes512'].forEach(alg => {
+	module.exports.decrypt[alg] = function (data, password, encoding) {
+		return decrypt(data, secret, alg).toString(encoding || 'hex');
+	};
+	module.exports.encrypt[alg] = function (data, password, encoding) {
+		return encrypt(data, secret, alg).toString(encoding || 'hex');
+	};
+});
