@@ -64,9 +64,9 @@ module.exports = {
 	hash
 };
 
-['md5', 'sha', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'].forEach( alg => {
-	module.exports[`${alg}sum`] = function (data, encoding) {
-		return hash(data, alg).toString(encoding || DEFAULT_HASH_ENCODING);
+['md5', 'sha', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'].forEach( algorithm => {
+	module.exports[`${algorithm}sum`] = function (data, encoding) {
+		return hash(data, algorithm).toString(encoding || DEFAULT_HASH_ENCODING);
 	};
 });
 
@@ -79,11 +79,11 @@ module.exports = {
 	};
 });
 
-['aes192', 'aes256', 'aes512'].forEach(alg => {
-	module.exports.decrypt[alg] = function (data, password, encoding) {
-		return decrypt(data, secret, alg).toString(encoding || 'hex');
+['aes192', 'aes256', 'aes512'].forEach(algorithm => {
+	module.exports.decrypt[algorithm] = function (data, password, encoding) {
+		return decrypt(data, password, algorithm).toString(encoding || 'hex');
 	};
-	module.exports.encrypt[alg] = function (data, password, encoding) {
-		return encrypt(data, secret, alg).toString(encoding || 'hex');
+	module.exports.encrypt[algorithm] = function (data, password, encoding) {
+		return encrypt(data, password, algorithm).toString(encoding || 'hex');
 	};
 });
