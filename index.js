@@ -64,7 +64,7 @@ module.exports = {
 	hash
 };
 
-['md5', 'sha', 'sha1', 'sha224', 'sha384', 'sha512'].forEach( alg => {
+['md5', 'sha', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'].forEach( alg => {
 	module.exports[`${alg}sum`] = function (data, encoding) {
 		return hash(data, alg).toString(encoding || DEFAULT_HASH_ENCODING);
 	};
