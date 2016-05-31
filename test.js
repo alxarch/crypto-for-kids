@@ -45,12 +45,23 @@ describe('Crypto for kids module', () => {
 	describe('crypto.encrypt()', () => {
 		it('Encrypts/decrypts data with default settings', () => {
 			const encrypted = crypto.encrypt('Foo bar baz', 'secretesauce');
-			const decrypted = crypto.decrypt(encrypted, 'secretesauce');
+			assert('string' == typeof encrypted , 'encrypt returns string');
+			const decrypted = crypto.decrypt.hex(encrypted, 'secretesauce');
+			assert('string' == typeof decrypted , 'decrypt returns string');
 			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
 		it('Encrypts/decrypts buffer data with default settings', () => {
 			const encrypted = crypto.encrypt(new Buffer('Foo bar baz'), 'secretesauce');
-			const decrypted = crypto.decrypt(encrypted, 'secretesauce');
+			const decrypted = crypto.decrypt.hex(encrypted, 'secretesauce');
+			assert.equal('Foo bar baz', decrypted, 'OK');
+		});
+	});
+	describe('crypto.encrypt.aes192()', () => {
+		it('Encrypts/decrypts data with default settings', () => {
+			const encrypted = crypto.encrypt.aes192('Foo bar baz', 'secretsauce');
+			assert.equal(typeof encrypted, 'string',  'encrypt.aes192 returns string');
+			const decrypted = crypto.decrypt.hex.aes192(encrypted, 'secretsauce');
+			assert.equal(typeof decrypted, 'string',  'decrypt.aes192 returns string');
 			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
 	});
@@ -58,8 +69,7 @@ describe('Crypto for kids module', () => {
 	describe('crypto.hash', () => {
 		it('Defaults to MD5', () => {
 			const hash = crypto.hash('Foo bar baz');
-			assert(hash instanceof Buffer);
-			assert.equal(hash.toString('hex'), '520c28a8ac3459af817a1abfb3bd152e');
+			assert.equal(hash, '520c28a8ac3459af817a1abfb3bd152e');
 		});
 	});
 	describe('crypto.md5sum', () => {

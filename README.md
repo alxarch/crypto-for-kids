@@ -36,9 +36,24 @@ For `rsXXX` functions key can be an Object with passprhrase like in node's crypt
 
 ## Encryption
 
-### crypto.decrypt.aes192(data, secret, [encoding])
+### crypto.encrypt(data, secret, algorithm, [encoding])
 ### crypto.encrypt.aes192(data, secret, [encoding])
-### crypto.decrypt.aes256(data, secret, [encoding])
 ### crypto.encrypt.aes256(data, secret, [encoding])
-### crypto.decrypt.aes512(data, secret, [encoding])
 ### crypto.encrypt.aes512(data, secret, [encoding])
+
+### crypto.decrypt(data, secret, algorithm, [encoding])
+
+### crypto.decrypt.aes192(data, secret, [encoding])
+### crypto.decrypt.aes256(data, secret, [encoding])
+### crypto.decrypt.aes512(data, secret, [encoding])
+
+### crypto.decrypt.hex(data, secret, algorithm, [encoding])
+### crypto.decrypt.hex.aes192(data, secret, [encoding])
+### crypto.decrypt.hex.aes256(data, secret, [encoding])
+### crypto.decrypt.hex.aes512(data, secret, [encoding])
+
+### crypto.decrypt.base64(data, secret, algorithm, [encoding])
+### crypto.decrypt.base64.aes192(data, secret, [encoding])
+### crypto.decrypt.base64.aes256(data, secret, [encoding])
+### crypto.decrypt.base64.aes512(data, secret, [encoding])
+
