@@ -9,7 +9,7 @@ const DEFAULT_ENCODING = 'hex';
 function encrypt (data, secret, algorithm, encoding) {
 	data = data instanceof Buffer ? data : new Buffer(data);
 	if (!(secret instanceof Buffer)) {
-		secret = 'string' === typeof data ? new Buffer(secret) : new Buffer(data);
+		secret = 'string' === typeof secret ? new Buffer(secret) : new Buffer(data);
 	}
 	const cipher = crypto.createCipher(algorithm || DEFAULT_CIPHER_ALGORITHM, secret);
 	const parts = [];
@@ -25,7 +25,7 @@ function decrypt (data, secret, algorithm, encoding) {
 	}
 
 	if (!(secret instanceof Buffer)) {
-		secret = 'string' === typeof data ? new Buffer(secret) : new Buffer(data);
+		secret = 'string' === typeof secret ? new Buffer(secret) : new Buffer(data);
 	}
 
 	const decipher = crypto.createDecipher(algorithm || DEFAULT_CIPHER_ALGORITHM, secret);
