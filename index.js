@@ -40,7 +40,8 @@ Crypto.prototype.decrypt = function decrypt (data, secret, algorithm) {
 	const parts = [];
 	parts.push(decipher.update(data));
 	parts.push(decipher.final());
-	return this.output(Buffer.concat(parts));
+	const result = Buffer.concat(parts);
+	return this.output_encoding === null ? result : result.toString();
 };
 
 Crypto.prototype.hash = function hash (data, algorithm) {
