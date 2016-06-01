@@ -51,7 +51,7 @@ describe('Crypto for kids module', () => {
 			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
 		it('Encrypts/decrypts buffer data with default settings', () => {
-			const encrypted = crypto.encrypt(new Buffer('Foo bar baz'), 'secretesauce');
+			const encrypted = crypto.encrypt('Foo bar baz', 'secretesauce');
 			const decrypted = crypto.decrypt.hex(encrypted, 'secretesauce');
 			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
