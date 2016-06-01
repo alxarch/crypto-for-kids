@@ -10,12 +10,12 @@ function Crypto (input_encoding, output_encoding) {
 	if (!(this instanceof Crypto)) {
 		return new Crypto(input_encoding, output_encoding);
 	}
-	this.input_encoding = input_encoding || DEFAULT_ENCODING;
-	this.output_encoding = output_encoding || DEFAULT_ENCODING;
+	this.input_encoding = input_encoding === false ? null : (input_encoding || DEFAULT_ENCODING);
+	this.output_encoding = output_encoding === false ? null : (output_encoding || DEFAULT_ENCODING);
 }
 
 Crypto.prototype.output = function (result) {
-	return null === this.encoding ? result : result.toString(this.output_encoding)
+	return this.output_encoding ? result : result.toString(this.output_encoding)
 }
 
 Crypto.prototype.encrypt = function encrypt (data, secret, algorithm) {
@@ -32,7 +32,8 @@ Crypto.prototype.encrypt = function encrypt (data, secret, algorithm) {
 Crypto.prototype.decrypt = function decrypt (data, secret, algorithm) {
 
 	if (!(data instanceof Buffer)) {
-		data = 'string' === typeof data ? new Buffer(data, this.input_encoding) : new Buffer(data);
+		data = 'string' === typeof data && this.input_encoding ?
+			new Buffer(data, this.input_encoding) : new Buffer(data);
 	}
 	secret = secret instanceof Buffer ? secret : new Buffer(secret);
 
@@ -41,7 +42,7 @@ Crypto.prototype.decrypt = function decrypt (data, secret, algorithm) {
 	parts.push(decipher.update(data));
 	parts.push(decipher.final());
 	const result = Buffer.concat(parts);
-	return this.output_encoding === null ? result : result.toString();
+	return this.output_encoding ? result.toString() : result;
 };
 
 Crypto.prototype.hash = function hash (data, algorithm) {
@@ -102,5 +103,5 @@ Object.setPrototypeOf(module.exports, Object.create(Crypto.prototype, {
 
 module.exports.Crypto = Crypto;
 module.exports.hex = Crypto('hex', 'hex');
-module.exports.buffer = Crypto(null, null);
+module.exports.buffer = Crypto(false, false);
 module.exports.base64 = Crypto('base64', 'base64');
