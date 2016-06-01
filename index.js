@@ -6,7 +6,19 @@ const DEFAULT_HASH_ALGORITHM = 'md5';
 const DEFAULT_HMAC_ALGORITHM = 'HS256';
 const DEFAULT_ENCODING = 'hex';
 
-function encrypt (data, secret, algorithm, encoding) {
+function Crypto (input_encoding, output_encoding) {
+	if (!(this instanceof Crypto)) {
+		return new Crypto(input_encoding, output_encoding);
+	}
+	this.input_encoding = input_encoding || DEFAULT_ENCODING;
+	this.output_encoding = output_encoding || DEFAULT_ENCODING;
+}
+
+Crypto.prototype.output = function (result) {
+	return null === this.encoding ? result : result.toString(this.output_encoding)
+}
+
+Crypto.prototype.encrypt = function encrypt (data, secret, algorithm) {
 	data = data instanceof Buffer ? data : new Buffer(data);
 	secret = secret instanceof Buffer ? secret : new Buffer(secret);
 
@@ -14,14 +26,13 @@ function encrypt (data, secret, algorithm, encoding) {
 	const parts = [];
 	parts.push(cipher.update(data));
 	parts.push(cipher.final());
-	const result = Buffer.concat(parts);
-	return null === encoding ? result : result.toString(encoding || DEFAULT_ENCODING);
-}
+	return this.output(Buffer.concat(parts));
+};
 
-function decrypt (data, secret, algorithm, encoding) {
+Crypto.prototype.decrypt = function decrypt (data, secret, algorithm) {
 
 	if (!(data instanceof Buffer)) {
-		data = 'string' === typeof data ? new Buffer(data, DEFAULT_ENCODING) : new Buffer(data);
+		data = 'string' === typeof data ? new Buffer(data, this.input_encoding) : new Buffer(data);
 	}
 	secret = secret instanceof Buffer ? secret : new Buffer(secret);
 
@@ -29,75 +40,66 @@ function decrypt (data, secret, algorithm, encoding) {
 	const parts = [];
 	parts.push(decipher.update(data));
 	parts.push(decipher.final());
-	const result = Buffer.concat(parts);
-	return null === encoding ? result : result.toString(encoding || 'utf8');
-}
-
-decrypt.base64 = function (data, secret, algorithm, encoding) {
-	return decrypt(new Buffer(data, 'base64'), secret, algorithm, encoding);
+	return this.output(Buffer.concat(parts));
 };
 
-decrypt.hex = function (data, secret, algorithm, encoding) {
-	return decrypt(new Buffer(data, 'hex'), secret, algorithm, encoding);
-};
-
-function hash (data, algorithm, encoding) {
+Crypto.prototype.hash = function hash (data, algorithm) {
 	data = data instanceof Buffer ? data : new Buffer(data);
 	const _hash = crypto.createHash(algorithm || DEFAULT_HASH_ALGORITHM);
 	_hash.end(data);
 	const result = _hash.read();
-	return null === encoding ? result : result.toString(encoding || DEFAULT_ENCODING);
-}
+	return this.output(result);
+};
 
-function sign (data, key, algorithm, encoding) {
+Crypto.prototype.sign = function sign (data, key, algorithm) {
 	data = data instanceof Buffer ? data : new Buffer(data);
 	const _sign = crypto.createSign(algorithm);
 	_sign.update(data);
 	const result = _sign.sign(key);
-	return null === encoding ? result : result.toString(encoding || DEFAULT_ENCODING);
-}
+	return this.output(result);
+};
 
-function hmac (data, secret, algorithm, encoding) {
+Crypto.prototype.hmac = function hmac (data, secret, algorithm) {
 	data = data instanceof Buffer ? data : new Buffer(data);
 	const _hmac = crypto.createHmac(algorithm || DEFAULT_HMAC_ALGORITHM, secret);
 	_hmac.end(data);
 	const result = _hmac.read();
-	return null === encoding ? result : result.toString(encoding || DEFAULT_ENCODING);
-}
+	return this.output(result);
+};
 
 
 ['md5', 'sha', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'].forEach( algorithm => {
-	exports[`${algorithm}sum`] = function (data, encoding) {
-		return hash(data, algorithm, encoding);
+	Crypto.prototype[`${algorithm}sum`] = function (data) {
+		return this.hash(data, algorithm);
 	};
 });
 
 [256, 384, 512].forEach( bits => {
-	exports[`hs${bits}`] = function (data, secret, encoding) {
-		return hmac(data, secret, `sha${bits}`, encoding);
+	Crypto.prototype[`hs${bits}`] = function (data, secret) {
+		return this.hmac(data, secret, `sha${bits}`);
 	};
-	exports[`rs${bits}`] = function (data, key, encoding) {
-		return sign(data, key, `RSA-SHA${bits}`, encoding)
+	Crypto.prototype[`rs${bits}`] = function (data, key) {
+		return this.sign(data, key, `RSA-SHA${bits}`);
 	};
 });
 
 ['aes192', 'aes256', 'aes512'].forEach(algorithm => {
-	decrypt[algorithm] = function (data, password, encoding) {
-		return decrypt(data , password, algorithm, encoding)
+	Crypto.prototype[`${algorithm}decrypt`] = function (data, password) {
+		return this.decrypt(data , password, algorithm);
 	};
-	decrypt.hex[algorithm] = function (data, password, encoding) {
-		return decrypt.hex(data, password, algorithm, encoding);
-	}
-	decrypt.base64[algorithm] = function (data, password, encoding) {
-		return decrypt.base64(data, password, algorithm, encoding);
-	}
-	encrypt[algorithm] = function (data, password, encoding) {
-		return encrypt(data, password, algorithm, encoding);
+	Crypto.prototype[`${algorithm}encrypt`] = function (data, password) {
+		return this.encrypt(data, password, algorithm);
 	};
 });
 
-exports.sign = sign;
-exports.encrypt = encrypt;
-exports.decrypt = decrypt;
-exports.hmac = hmac;
-exports.hash = hash;
+
+module.exports = Crypto;
+Object.setPrototypeOf(module.exports, Object.create(Crypto.prototype, {
+	output_encoding: { value: 'hex', writable: false },
+	input_encoding: { value: 'hex', writable: false }
+}));
+
+module.exports.Crypto = Crypto;
+module.exports.hex = Crypto('hex', 'hex');
+module.exports.buffer = Crypto(null, null);
+module.exports.base64 = Crypto('base64', 'base64');
