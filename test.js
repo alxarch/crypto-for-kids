@@ -21,7 +21,8 @@ describe('Crypto for kids module', () => {
 	describe('crypto.hs256()', () => {
 		it('Signs string data with base64', () => {
 			assert.equal(
-				crypto.hs256('Foo bar baz', 'secretsauce', 'base64'),
+
+				crypto.base64.hs256('Foo bar baz', 'secretsauce'),
 				'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
 		});
 		it('Signs string data with default settings', () => {
@@ -32,7 +33,7 @@ describe('Crypto for kids module', () => {
 
 		it('Signs buffer data with base64', () => {
 			assert.equal(
-					crypto.hs256(new Buffer('Foo bar baz'), 'secretsauce', 'base64'),
+					crypto.base64.hs256(new Buffer('Foo bar baz'), 'secretsauce'),
 					'zZ/HU0VoLD31Fg+ms9s09ZNAFYqwom9SHr8NOeLoV/k=');
 		});
 		it('Signs buffer data with default to hex', () => {
@@ -46,7 +47,7 @@ describe('Crypto for kids module', () => {
 		it('Encrypts/decrypts data with default settings', () => {
 			const encrypted = crypto.encrypt('Foo bar baz', 'secretesauce');
 			assert('string' == typeof encrypted , 'encrypt returns string');
-			const decrypted = crypto.decrypt.hex(encrypted, 'secretesauce');
+			const decrypted = crypto.decrypt(encrypted, 'secretesauce');
 			assert('string' == typeof decrypted , 'decrypt returns string');
 			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
@@ -60,7 +61,7 @@ describe('Crypto for kids module', () => {
 		it('Encrypts/decrypts data with default settings', () => {
 			const encrypted = crypto.encrypt.aes192('Foo bar baz', 'secretsauce');
 			assert.equal(typeof encrypted, 'string',  'encrypt.aes192 returns string');
-			const decrypted = crypto.decrypt.hex.aes192(encrypted, 'secretsauce');
+			const decrypted = crypto.decrypt.aes192(encrypted, 'secretsauce');
 			assert.equal(typeof decrypted, 'string',  'decrypt.aes192 returns string');
 			assert.equal('Foo bar baz', decrypted, 'OK');
 		});
