@@ -15,7 +15,7 @@ function Crypto (input_encoding, output_encoding) {
 }
 
 Crypto.prototype.output = function (result) {
-	return this.output_encoding ? result : result.toString(this.output_encoding)
+	return this.output_encoding ? result.toString(this.output_encoding) : result;
 }
 
 Crypto.prototype.encrypt = function encrypt (data, secret, algorithm) {
