@@ -85,7 +85,7 @@ Crypto.prototype.hmac = function hmac (data, secret, algorithm) {
 	};
 });
 
-['aes192', 'aes256', 'aes512'].forEach(algorithm => {
+['aes128', 'aes192', 'aes256'].forEach(algorithm => {
 	Crypto.prototype[`${algorithm}decrypt`] = function (data, password) {
 		return this.decrypt(data , password, algorithm);
 	};
